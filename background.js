@@ -1,0 +1,78 @@
+chrome.identity.getAuthToken(
+	{'interactive': true},
+	function(){
+	 
+		window.gapi_onload = authorize;
+		loadScript('https://apis.google.com/js/client.js');
+	}
+);
+
+function loadScript(url){
+  var request = new XMLHttpRequest();
+
+	request.onreadystatechange = function(){
+		if(request.readyState !== 4) {
+			return;
+		}
+
+		if(request.status !== 200){
+			return;
+		}
+
+    eval(request.responseText);
+	};
+
+	request.open('GET', url);
+	request.send();
+}
+
+function authorize(){
+  gapi.auth.authorize(
+		{
+			client_id: '<58533486094-26jmrvejbg031vbb62m0uu73snj4knce.apps.googleusercontent.com>',
+			immediate: true,
+			scope: 'https://www.googleapis.com/auth/gmail.modify'
+		},
+		function(){
+		  gapi.client.load('gmail', 'v1', gmailAPILoaded);
+		}
+	);
+}
+
+function gmailAPILoaded(){
+    
+}
+
+
+
+function getThreads(query, labels){
+  return gapi.client.gmail.users.threads.list({
+		userId: 'me',
+		q: query, 
+		labelIds: labels 
+	}); 
+}
+
+
+function getThreadDetails(threads){
+  var batch = new gapi.client.newBatch();
+
+	for(var ii=0; ii<threads.length; ii++){
+		batch.add(gapi.client.gmail.users.threads.get({
+			userId: 'me',
+			id: threads[ii].id
+		}));
+	}
+
+	return batch;
+}
+
+function getThreadHTML(threadDetails){
+  var body = threadDetails.result.messages[0].payload.parts[1].body.data;
+	return B64.decode(body);
+}
+
+
+
+	request.execute();
+}
